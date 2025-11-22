@@ -109,14 +109,10 @@ function App() {
             </span>
             <div>
               <h1 className="text-lg font-semibold">TinyLink</h1>
-              <p className="text-xs text-slate-300">
-                Simple URL shortener (React + Node + Postgres)
-              </p>
+           
             </div>
           </div>
-          <div className="hidden sm:block text-xs text-slate-300">
-            Backend: <span className="font-mono">{API_BASE_URL}</span>
-          </div>
+         
         </div>
       </header>
 
