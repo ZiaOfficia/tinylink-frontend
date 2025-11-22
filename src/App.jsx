@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const API_BASE_URL = "http://localhost:5000";
+const API_BASE_URL = "https://tinylink-backend-5k3a.onrender.com";
 
 function App() {
   const [url, setUrl] = useState("");
@@ -41,15 +41,15 @@ function App() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-
       const data = await res.json();
 
       if (!res.ok) {
         setMessageType("error");
         setMessage(data.message || "Error creating link");
       } else {
+        const shortUrl = `${API_BASE_URL.replace(/\/$/, "")}/${data.code}`;
         setMessageType("success");
-        setMessage(`Short URL created: ${data.short_url}`);
+        setMessage(`Short URL created: ${shortUrl}`);
         setUrl("");
         setCode("");
         fetchLinks();
@@ -222,63 +222,79 @@ function App() {
                       </th>
                     </tr>
                   </thead>
+
                   <tbody className="divide-y divide-slate-100">
-                    {links.map((link) => (
-                      <tr key={link.id} className="hover:bg-slate-50/60">
-                        <td className="px-3 py-2 font-mono text-xs sm:text-sm">
-                          {link.code}
-                        </td>
-                        <td className="px-3 py-2">
-                          <div className="flex items-center gap-2">
+                    {links.map((link) => {
+                      const shortUrl = `${API_BASE_URL.replace(
+                        /\/$/,
+                        ""
+                      )}/${link.code}`;
+
+                      return (
+                        <tr
+                          key={link.id}
+                          className="hover:bg-slate-50/60"
+                        >
+                          <td className="px-3 py-2 font-mono text-xs sm:text-sm">
+                            {link.code}
+                          </td>
+
+                          <td className="px-3 py-2">
+                            <div className="flex items-center gap-2">
+                              <a
+                                href={shortUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-sky-600 hover:underline break-all text-xs sm:text-sm"
+                              >
+                                {shortUrl}
+                              </a>
+                              <button
+                                onClick={() => copyToClipboard(shortUrl)}
+                                className="rounded-full border border-slate-300 px-2 py-1 text-[10px] uppercase tracking-wide text-slate-600 hover:bg-slate-100"
+                              >
+                                Copy
+                              </button>
+                            </div>
+                          </td>
+
+                          <td className="px-3 py-2 max-w-xs">
                             <a
-                              href={link.short_url}
+                              href={link.original_url}
                               target="_blank"
                               rel="noreferrer"
-                              className="text-sky-600 hover:underline break-all text-xs sm:text-sm"
+                              title={link.original_url}
+                              className="block truncate text-slate-700 hover:underline"
                             >
-                              {link.short_url}
+                              {link.original_url}
                             </a>
+                          </td>
+
+                          <td className="px-3 py-2 text-center">
+                            <span className="inline-flex items-center justify-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
+                              {link.clicks}
+                            </span>
+                          </td>
+
+                          <td className="px-3 py-2 text-xs text-slate-500">
+                            {link.last_clicked_at
+                              ? new Date(
+                                  link.last_clicked_at
+                                ).toLocaleString()
+                              : "Never"}
+                          </td>
+
+                          <td className="px-3 py-2 text-right">
                             <button
-                              onClick={() => copyToClipboard(link.short_url)}
-                              className="rounded-full border border-slate-300 px-2 py-1 text-[10px] uppercase tracking-wide text-slate-600 hover:bg-slate-100"
+                              onClick={() => handleDelete(link.code)}
+                              className="text-xs text-red-600 hover:text-red-700 hover:underline"
                             >
-                              Copy
+                              Delete
                             </button>
-                          </div>
-                        </td>
-                        <td className="px-3 py-2 max-w-xs">
-                          <a
-                            href={link.original_url}
-                            target="_blank"
-                            rel="noreferrer"
-                            title={link.original_url}
-                            className="block truncate text-slate-700 hover:underline"
-                          >
-                            {link.original_url}
-                          </a>
-                        </td>
-                        <td className="px-3 py-2 text-center">
-                          <span className="inline-flex items-center justify-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
-                            {link.clicks}
-                          </span>
-                        </td>
-                        <td className="px-3 py-2 text-xs text-slate-500">
-                          {link.last_clicked_at
-                            ? new Date(
-                                link.last_clicked_at
-                              ).toLocaleString()
-                            : "Never"}
-                        </td>
-                        <td className="px-3 py-2 text-right">
-                          <button
-                            onClick={() => handleDelete(link.code)}
-                            className="text-xs text-red-600 hover:text-red-700 hover:underline"
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
